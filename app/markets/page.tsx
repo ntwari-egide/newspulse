@@ -1,12 +1,47 @@
-import { Suspense } from 'react'
-import Header from '@/components/header'
-import Sidebar from '@/components/sidebar'
-import { Skeleton } from '@/components/ui/skeleton'
-import { getMarketNews } from '@/lib/news-data'
-import NewsCard from '@/components/news-card'
-import { TrendingUp, TrendingDown } from 'lucide-react'
+"use client"
+
+import { useState, useEffect } from "react"
+import Header from "@/components/header"
+import Sidebar from "@/components/sidebar"
+import NewsGrid from "@/components/news-grid"
+import { TrendingUp, TrendingDown } from "lucide-react"
+
+interface MarketIndex {
+  name: string
+  value: string
+  change: string
+  positive: boolean
+}
 
 export default function MarketsPage() {
+  const [indices, setIndices] = useState<MarketIndex[]>([
+    { name: "S&P 500", value: "4,783.45", change: "+1.2%", positive: true },
+    { name: "NASDAQ", value: "15,361.64", change: "+2.1%", positive: true },
+    { name: "DOW", value: "37,695.73", change: "-0.3%", positive: false },
+    { name: "RUSSELL", value: "2,089.54", change: "+0.8%", positive: true },
+  ])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndices((prev) =>
+        prev.map((index) => {
+          const changeValue = Number.parseFloat(index.change.replace("%", ""))
+          const randomChange = (Math.random() - 0.5) * 0.5
+          const newChange = (changeValue + randomChange).toFixed(1)
+          const positive = Number.parseFloat(newChange) >= 0
+
+          return {
+            ...index,
+            change: `${positive ? "+" : ""}${newChange}%`,
+            positive,
+          }
+        }),
+      )
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -17,22 +52,17 @@ export default function MarketsPage() {
               <h1 className="text-4xl font-bold tracking-tight">Markets</h1>
               <p className="mt-2 text-muted-foreground">Financial markets and trading news</p>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MarketIndexCard name="S&P 500" value="4,783.45" change="+1.2%" positive />
-              <MarketIndexCard name="NASDAQ" value="15,361.64" change="+2.1%" positive />
-              <MarketIndexCard name="DOW" value="37,695.73" change="-0.3%" positive={false} />
-              <MarketIndexCard name="RUSSELL" value="2,089.54" change="+0.8%" positive />
+              {indices.map((index) => (
+                <MarketIndexCard key={index.name} {...index} />
+              ))}
             </div>
 
-            <Suspense fallback={<NewsSkeleton />}>
-              <MarketsContent />
-            </Suspense>
+            <NewsGrid type="market" limit={8} />
           </div>
           <aside className="space-y-6">
-            <Suspense fallback={<SidebarSkeleton />}>
-              <Sidebar />
-            </Suspense>
+            <Sidebar />
           </aside>
         </div>
       </main>
@@ -40,46 +70,17 @@ export default function MarketsPage() {
   )
 }
 
-function MarketIndexCard({ name, value, change, positive }: { name: string; value: string; change: string; positive: boolean }) {
+function MarketIndexCard({ name, value, change, positive }: MarketIndex) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <div className="rounded-lg border border-border bg-card p-4 transition-all hover:border-primary">
       <div className="text-sm text-muted-foreground">{name}</div>
       <div className="mt-1 text-xl font-bold">{value}</div>
-      <div className={`mt-1 flex items-center gap-1 text-sm font-semibold ${positive ? 'text-positive' : 'text-negative'}`}>
+      <div
+        className={`mt-1 flex items-center gap-1 text-sm font-semibold transition-colors ${positive ? "text-positive" : "text-negative"}`}
+      >
         {positive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
         {change}
       </div>
-    </div>
-  )
-}
-
-async function MarketsContent() {
-  const articles = await getMarketNews()
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {articles.map((article) => (
-        <NewsCard key={article.id} article={article} />
-      ))}
-    </div>
-  )
-}
-
-function NewsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-64 w-full rounded-lg" />
-      ))}
-    </div>
-  )
-}
-
-function SidebarSkeleton() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-32 w-full rounded-lg" />
-      <Skeleton className="h-96 w-full rounded-lg" />
     </div>
   )
 }

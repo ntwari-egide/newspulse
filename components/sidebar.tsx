@@ -1,12 +1,52 @@
-import { Sparkles, TrendingUp, MessageCircle, ChevronRight } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { getDailyIndex, getNewsSummary } from '@/lib/news-data'
+"use client"
 
-export default async function Sidebar() {
-  const dailyIndex = await getDailyIndex()
-  const summary = await getNewsSummary()
+import { Sparkles, MessageCircle, ChevronRight } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+
+interface DailyIndexData {
+  score: number
+  sentiment: "Positive" | "Negative" | "Neutral"
+  percentage: number
+}
+
+interface NewsSummaryData {
+  items: string[]
+  timeframe: string
+}
+
+export default function Sidebar() {
+  const [dailyIndex, setDailyIndex] = useState<DailyIndexData>({
+    score: 91,
+    sentiment: "Positive",
+    percentage: 78,
+  })
+  const [summary, setSummary] = useState<NewsSummaryData>({
+    items: [],
+    timeframe: "24 hours",
+  })
+  const [timeframe, setTimeframe] = useState<"day" | "week" | "month">("day")
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [indexRes, summaryRes] = await Promise.all([fetch("/api/index"), fetch("/api/summary")])
+        const indexData = await indexRes.json()
+        const summaryData = await summaryRes.json()
+        setDailyIndex(indexData)
+        setSummary(summaryData)
+      } catch (error) {
+        console.error("Failed to fetch sidebar data:", error)
+      }
+    }
+
+    fetchData()
+
+    const interval = setInterval(fetchData, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -21,13 +61,21 @@ export default async function Sidebar() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between text-sm">
-            {['Negative', 'Serious', 'Neutral', 'Optimistic'].map((mood, i) => (
-              <span key={mood} className={i === 0 ? 'font-medium' : 'text-muted-foreground'}>
+            {["Negative", "Serious", "Neutral", "Optimistic"].map((mood, i) => (
+              <span key={mood} className={i === 0 ? "font-medium" : "text-muted-foreground"}>
                 {mood}
               </span>
             ))}
-            <Badge className="bg-positive text-positive-foreground">
-              {dailyIndex.score} Positive
+            <Badge
+              className={`${
+                dailyIndex.sentiment === "Positive"
+                  ? "bg-positive text-positive-foreground"
+                  : dailyIndex.sentiment === "Negative"
+                    ? "bg-destructive text-destructive-foreground"
+                    : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {dailyIndex.score} {dailyIndex.sentiment}
             </Badge>
           </div>
           <div className="relative h-2 rounded-full bg-muted">
@@ -47,16 +95,8 @@ export default async function Sidebar() {
               <CardTitle className="text-lg">AI Assistant</CardTitle>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"
-                  fill="currentColor"
-                />
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" fill="currentColor" />
               </svg>
             </Button>
           </div>
@@ -64,16 +104,25 @@ export default async function Sidebar() {
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2">
             <Button
-              variant="secondary"
+              variant={timeframe === "day" ? "secondary" : "ghost"}
               size="sm"
-              className="bg-secondary text-foreground"
+              onClick={() => setTimeframe("day")}
+              className={timeframe === "day" ? "bg-secondary text-foreground" : ""}
             >
               Last Day
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button
+              variant={timeframe === "week" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setTimeframe("week")}
+            >
               Last Week
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button
+              variant={timeframe === "month" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setTimeframe("month")}
+            >
               Last Month
             </Button>
           </div>
@@ -99,11 +148,11 @@ export default async function Sidebar() {
 
           <div className="pt-4 space-y-2">
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Trump rally shooting update</Badge>
-              <Badge variant="secondary">Kamala Harris</Badge>
+              <Badge variant="secondary">Federal Reserve</Badge>
+              <Badge variant="secondary">Tech Earnings</Badge>
             </div>
             <div className="flex gap-2">
-              <Badge variant="secondary">Shooter arrested details</Badge>
+              <Badge variant="secondary">Market Analysis</Badge>
             </div>
           </div>
 

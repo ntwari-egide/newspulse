@@ -1,0 +1,32 @@
+scalingPolicies:
+  - policyName: newspulse-cpu-scaling
+    policyType: TargetTrackingScaling
+    targetTrackingConfiguration:
+      predefinedMetricType: ECSServiceAverageCPUUtilization
+      targetValue: 70.0
+      scaleInCooldown: 60
+      scaleOutCooldown: 60
+
+  - policyName: newspulse-memory-scaling
+    policyType: TargetTrackingScaling
+    targetTrackingConfiguration:
+      predefinedMetricType: ECSServiceAverageMemoryUtilization
+      targetValue: 80.0
+      scaleInCooldown: 60
+      scaleOutCooldown: 60
+
+  - policyName: newspulse-request-count-scaling
+    policyType: TargetTrackingScaling
+    targetTrackingConfiguration:
+      predefinedMetricType: ALBRequestCountPerTarget
+      targetValue: 1000.0
+      scaleInCooldown: 300
+      scaleOutCooldown: 60
+
+scalableTarget:
+  serviceNamespace: ecs
+  resourceId: service/newspulse-cluster/newspulse-service
+  scalableDimension: ecs:service:DesiredCount
+  minCapacity: 2
+  maxCapacity: 10
+  roleARN: arn:aws:iam::ACCOUNT_ID:role/ecsAutoscaleRole
