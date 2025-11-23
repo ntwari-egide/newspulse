@@ -11,6 +11,18 @@ interface NewsSummaryData {
   timeframe: string
 }
 
+interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: Date
+}
+
+interface ConversationHistory {
+  userId: string
+  messages: ChatMessage[]
+}
+
 class DataStore {
   private articles: NewsArticle[]
   private timelines: Timeline[]
@@ -18,6 +30,7 @@ class DataStore {
   private newsSummary: NewsSummaryData
   private bookmarkedArticles: Set<string>
   private viewedArticles: Set<string>
+  private conversations: Map<string, ConversationHistory>
 
   constructor() {
     this.articles = this.generateInitialArticles()
@@ -38,6 +51,7 @@ class DataStore {
     }
     this.bookmarkedArticles = new Set()
     this.viewedArticles = new Set()
+    this.conversations = new Map()
 
     // Simulate real-time updates
     this.startRealTimeUpdates()
@@ -315,7 +329,7 @@ class DataStore {
         (article) =>
           article.title.toLowerCase().includes(searchLower) ||
           article.category.toLowerCase().includes(searchLower) ||
-          article.location.toLowerCase().includes(searchLower),
+          article.location?.toLowerCase().includes(searchLower),
       )
     }
 
@@ -388,6 +402,25 @@ class DataStore {
 
   getTrendingArticles(limit = 5): NewsArticle[] {
     return [...this.articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, limit)
+  }
+
+  saveConversation(userId: string, messages: ChatMessage[]): void {
+    this.conversations.set(userId, {
+      userId,
+      messages,
+    })
+  }
+
+  getConversation(userId: string): ChatMessage[] {
+    return this.conversations.get(userId)?.messages || []
+  }
+
+  clearConversation(userId: string): void {
+    this.conversations.delete(userId)
+  }
+
+  getAllConversations(): ConversationHistory[] {
+    return Array.from(this.conversations.values())
   }
 }
 

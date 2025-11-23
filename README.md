@@ -1,6 +1,6 @@
 # NewsPulse - Real-Time Media Dashboard
 
-A full-stack, production-ready news aggregation platform built with Next.js 16, featuring real-time updates, server-side rendering, and responsive design. Designed to deliver live financial news to thousands of concurrent users.
+A full-stack, production-ready news aggregation platform built with Next.js 16, featuring real-time updates, server-side rendering, AI-powered insights, and responsive design. Designed to deliver live financial news to thousands of concurrent users.
 
 ![NewsPulse Dashboard](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![Next.js](https://img.shields.io/badge/Next.js-16.0-black)
@@ -10,7 +10,9 @@ A full-stack, production-ready news aggregation platform built with Next.js 16, 
 ## Features
 
 - **Real-Time Updates**: Live news streaming with automatic content refresh every 30 seconds
+- **AI-Powered Assistant**: Intelligent chatbot using OpenAI GPT-4 for news analysis and contextual Q&A
 - **Server-Side Rendering**: Optimized SSR for fast initial page loads and SEO
+- **Streaming Responses**: Real-time AI chat with progressive rendering for better UX
 - **Responsive Design**: Mobile-first approach with CSS Grid and Flexbox layouts
 - **Dark Mode**: Built-in dark theme optimized for readability
 - **API Architecture**: RESTful API endpoints for all data operations
@@ -18,7 +20,7 @@ A full-stack, production-ready news aggregation platform built with Next.js 16, 
 - **Interactive UI**: Dynamic bookmarking, view tracking, and personalized feeds
 - **Market Data**: Live financial indices with real-time price updates
 - **Timeline Tracking**: Follow breaking news stories as they develop
-- **AI Assistant**: Integrated news summary and analysis tools
+- **Article Pages**: Beautiful serif typography for optimal reading experience
 
 ## Tech Stack
 
@@ -32,8 +34,10 @@ A full-stack, production-ready news aggregation platform built with Next.js 16, 
 
 ### Backend
 - **Next.js API Routes** - RESTful endpoints
+- **Vercel AI SDK** - Streaming AI responses with OpenAI integration
 - **In-Memory Data Store** - High-performance singleton pattern
 - **Real-Time Polling** - 30-second update intervals for live data
+- **Edge Runtime** - Low-latency API execution
 
 ### DevOps & Infrastructure
 - **Docker** - Containerization for consistent deployments
@@ -42,12 +46,50 @@ A full-stack, production-ready news aggregation platform built with Next.js 16, 
 - **Kubernetes** - Alternative deployment with HPA
 - **GitHub Actions** - CI/CD pipeline automation
 
+## 🤖 AI Assistant
+
+The AI Assistant is a fully integrated conversational interface powered by OpenAI's GPT-4 model, providing intelligent news analysis and contextual insights.
+
+### AI Features
+- **Real-Time Streaming**: Responses stream progressively for instant feedback
+- **Context Awareness**: Understands current articles and news landscape
+- **News Analysis**: Explains complex financial topics and market trends
+- **Smart Suggestions**: Pre-built question prompts for common queries
+- **Conversation Memory**: Maintains context throughout discussions
+
+### Setup AI Assistant
+
+1. **Get OpenAI API Key**
+   - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+   - Create a new API key (starts with `sk-`)
+   - Copy and store it securely
+
+2. **Add to Environment**
+   \`\`\`bash
+   # Local Development
+   cp .env.example .env.local
+   # Add: OPENAI_API_KEY=sk-your-key-here
+   
+   # Production (Vercel)
+   # Add in Vercel Dashboard → Settings → Environment Variables
+   
+   # Docker
+   docker run -p 3000:3000 -e OPENAI_API_KEY=sk-your-key newspulse:latest
+   \`\`\`
+
+3. **Verify**
+   - Open the app and click "AI Assistant" in the sidebar
+   - Ask: "What are the top stories today?"
+
+For detailed setup instructions, see [docs/AI_ASSISTANT.md](docs/AI_ASSISTANT.md)
+
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18.0 or higher
 - pnpm 8.0 or higher (recommended) or npm
+- OpenAI API key (optional, for AI Assistant)
 
 ### Installation
 
@@ -67,6 +109,7 @@ npm install
 3. Set up environment variables:
 \`\`\`bash
 cp .env.example .env.local
+# Add your OPENAI_API_KEY to .env.local
 \`\`\`
 
 4. Run the development server:
@@ -86,9 +129,11 @@ newspulse/
 │   ├── api/                 # API route handlers
 │   │   ├── articles/       # Article CRUD operations
 │   │   ├── categories/     # Category listings
+│   │   ├── chat/           # AI Assistant endpoint (streaming)
 │   │   ├── index/          # Daily sentiment index
 │   │   ├── summary/        # News summaries
 │   │   └── timelines/      # Timeline events
+│   ├── article/[id]/       # Dynamic article pages
 │   ├── feed/               # Personalized feed page
 │   ├── local/              # Local news page
 │   ├── markets/            # Financial markets page
@@ -98,14 +143,19 @@ newspulse/
 │   └── globals.css         # Global styles
 ├── components/              # React components
 │   ├── ui/                 # Reusable UI primitives
+│   ├── ai-chat-modal.tsx   # AI Assistant modal interface
 │   ├── header.tsx          # Navigation header
 │   ├── news-card.tsx       # Article card component
 │   ├── news-grid.tsx       # Grid layout for articles
+│   ├── related-articles.tsx # Related content component
 │   └── sidebar.tsx         # AI Assistant sidebar
 ├── lib/                     # Utilities and data
 │   ├── data-store.ts       # In-memory data management
+│   ├── news-data.ts        # Static news data
 │   ├── types.ts            # TypeScript type definitions
 │   └── utils.ts            # Helper functions
+├── docs/                    # Documentation
+│   └── AI_ASSISTANT.md     # Detailed AI setup guide
 ├── public/                  # Static assets
 ├── aws/                     # AWS deployment configs
 │   ├── ecs-task-definition.json
@@ -131,6 +181,11 @@ newspulse/
 - `GET /api/articles/[id]` - Get single article
 - `POST /api/articles/[id]` - Update article (bookmark, view tracking)
 
+### AI Assistant
+- `POST /api/chat` - Send message to AI assistant (streaming)
+  - Body: `{ messages: [...], newsContext: [...] }`
+  - Returns: Server-Sent Events stream
+
 ### Data
 - `GET /api/index` - Daily sentiment index
 - `GET /api/summary` - AI-generated news summary
@@ -145,8 +200,10 @@ newspulse/
 # Build Docker image
 docker build -t newspulse:latest .
 
-# Run container
-docker run -p 3000:3000 newspulse:latest
+# Run container with AI Assistant
+docker run -p 3000:3000 \
+  -e OPENAI_API_KEY=sk-your-key \
+  newspulse:latest
 
 # Or use Docker Compose
 docker-compose up -d
@@ -164,6 +221,7 @@ The application includes production-ready configurations for:
 
 - **Server Components**: Reduces client-side JavaScript bundle
 - **Streaming SSR**: Progressive page rendering for faster TTFB
+- **Edge Runtime**: AI endpoints run on edge for low latency
 - **Image Optimization**: Next.js Image component with lazy loading
 - **Code Splitting**: Automatic route-based code splitting
 - **Caching Strategy**: In-memory data store with 30s refresh intervals
@@ -182,6 +240,9 @@ pnpm type-check
 
 # Format code
 pnpm format
+
+# Run tests
+pnpm test
 \`\`\`
 
 ### Building for Production
@@ -212,6 +273,11 @@ pnpm start
 - **Flexibility**: Easy to swap data sources
 - **Testing**: Isolated endpoint testing
 
+### Why Edge Runtime for AI?
+- **Low Latency**: Runs closer to users globally
+- **Streaming**: Real-time response delivery
+- **Scalability**: Auto-scales with demand
+
 ## Scaling Considerations
 
 The application is designed to handle 1,000+ concurrent users:
@@ -221,6 +287,16 @@ The application is designed to handle 1,000+ concurrent users:
 3. **CDN**: Static assets served via CDN
 4. **Database**: Replace in-memory store with PostgreSQL + Redis cache
 5. **Message Queue**: Add RabbitMQ for background processing
+6. **Rate Limiting**: Protect AI endpoints with per-user limits
+
+## Security
+
+- **API Keys**: Managed via environment variables (never in code)
+- **Server-Side Only**: OpenAI calls from backend to protect credentials
+- **Input Sanitization**: All user inputs validated and sanitized
+- **Rate Limiting**: Prevents abuse of AI endpoints
+- **CORS Policies**: Configured for production domains
+- **Container Security**: Docker best practices implemented
 
 ## Contributing
 
@@ -242,4 +318,4 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
 
 ---
 
-Built with ❤️ using Next.js 16 and React 19
+Built with ❤️ using Next.js 16, React 19, and OpenAI GPT-4
