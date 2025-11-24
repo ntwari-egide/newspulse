@@ -34,7 +34,7 @@ A full-stack, production-ready news aggregation platform built with Next.js 16, 
 
 ### Backend
 - **Next.js API Routes** - RESTful endpoints
-- **Vercel AI SDK** - Streaming AI responses with OpenAI integration
+- **OpenAI Integration** - Streaming AI responses with GPT-4
 - **In-Memory Data Store** - High-performance singleton pattern
 - **Real-Time Polling** - 30-second update intervals for live data
 - **Edge Runtime** - Low-latency API execution
@@ -70,8 +70,8 @@ The AI Assistant is a fully integrated conversational interface powered by OpenA
    cp .env.example .env.local
    # Add: OPENAI_API_KEY=sk-your-key-here
    
-   # Production (Vercel)
-   # Add in Vercel Dashboard → Settings → Environment Variables
+   # Production
+   # Add environment variables in your deployment platform
    
    # Docker
    docker run -p 3000:3000 -e OPENAI_API_KEY=sk-your-key newspulse:latest

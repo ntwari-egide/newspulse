@@ -9,7 +9,6 @@
 # Next.js
 /.next/
 /out/
-.vercel
 
 # Production
 /build
@@ -30,9 +29,6 @@ pnpm-debug.log*
 .env
 .env.development
 .env.production
-
-# Vercel
-.vercel
 
 # TypeScript
 *.tsbuildinfo

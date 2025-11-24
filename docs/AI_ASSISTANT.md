@@ -60,18 +60,6 @@ echo "OPENAI_API_KEY=sk-your-actual-key-here" >> .env.local
 
 #### Production Deployment
 
-**Vercel:**
-\`\`\`bash
-# Using Vercel CLI
-vercel env add OPENAI_API_KEY
-
-# Or in Vercel Dashboard:
-# Settings → Environment Variables → Add Variable
-# Name: OPENAI_API_KEY
-# Value: sk-your-actual-key-here
-# Environment: Production, Preview, Development
-\`\`\`
-
 **AWS ECS:**
 \`\`\`json
 {
