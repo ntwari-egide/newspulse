@@ -53,18 +53,19 @@ export default function Header() {
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-900">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
-                  className="h-5 w-5 text-primary-foreground"
+                  className="h-5 w-5 text-blue-400"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M12 2L4 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-8-4zm0 18.5c-3.79-.86-6.5-4.25-6.5-8.5V7.5l6.5-3.25 6.5 3.25V12c0 4.25-2.71 7.64-6.5 8.5z"
-                    fill="currentColor"
-                  />
-                  <circle cx="12" cy="12" r="2" fill="currentColor" />
+                  <rect x="6" y="9" width="3" height="9" fill="currentColor" rx="1" />
+                  <rect x="10.5" y="6" width="3" height="12" fill="currentColor" rx="1" />
+                  <rect x="15" y="12" width="3" height="6" fill="currentColor" rx="1" />
+                  <circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" />
+                  <circle cx="12" cy="4.5" r="1.2" fill="currentColor" />
+                  <circle cx="16.5" cy="10.5" r="1.2" fill="currentColor" />
                 </svg>
               </div>
               <span className="text-xl font-bold">NewsPulse</span>
